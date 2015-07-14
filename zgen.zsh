@@ -32,6 +32,10 @@ if [[ -z "${ZGEN_OH_MY_ZSH_BRANCH}" ]]; then
     ZGEN_OH_MY_ZSH_BRANCH=master
 fi
 
+if [[ -z "${ZGEN_RESET_ON_CHANGE}" ]]; then
+    ZGEN_RESET_ON_CHANGE=${HOME}/.zshrc
+fi
+
 -zgen-encode-url () {
     # Remove characters from a url that don't work well in a filename.
     # Inspired by -anti-get-clone-dir() method from antigen.
@@ -156,6 +160,19 @@ zgen-save() {
     echo "# Add our plugins and completions to fpath">> "${ZGEN_INIT}"
     echo "#" >> "${ZGEN_INIT}"
     echo "fpath=(${(q)ZGEN_COMPLETIONS[@]} \${fpath})" >> "${ZGEN_INIT}"
+
+    if [[ ${ZGEN_RESET_ON_CHANGE} != 0 ]]; then
+       CHANGESHA=`shasum -a 256 ${ZGEN_RESET_ON_CHANGE}`
+       # automatically reset on .zshrc change
+       echo >> "${ZGEN_INIT}"
+       echo "#" >> "${ZGEN_INIT}"
+       echo "# Automatically resetting on filechange">> "${ZGEN_INIT}"
+       echo "#" >> "${ZGEN_INIT}"
+       echo "if [[ \"\`shasum -a 256 ${ZGEN_RESET_ON_CHANGE}\`\" != \"$CHANGESHA\" ]]; then" >> "${ZGEN_INIT}"
+       echo "   echo Changed file ${ZGEN_RESET_ON_CHANGE}, resetting zgen" >> "${ZGEN_INIT}"
+       echo "   zgen reset" >> "${ZGEN_INIT}"
+       echo "fi" >> "${ZGEN_INIT}"
+    fi
 
     zgen-apply --verbose
 }
