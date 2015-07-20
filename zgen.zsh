@@ -397,10 +397,31 @@ zgen-prezto() {
 
 }
 
+zgen-pmodule() {
+   local repo="${1}"
+   local branch="${2:-master}"
+
+   local dir="$(-zgen-get-clone-dir ${repo} ${branch})"
+
+   # clone repo if not present
+   if [[ ! -d "${dir}" ]]; then
+      zgen-clone "${repo}" "${branch}"
+   fi
+
+   local module=$(basename ${repo})
+
+   local preztodir="${ZDOTDIR:-$HOME}/.zprezto/modules/${module}"
+   if [[ ! -h ${preztodir} ]]; then
+      ln -s $dir ${preztodir}
+   fi
+
+   -zgen-prezto-load "'${module}'"
+}
+
 zgen() {
     local cmd="${1}"
     if [[ -z "${cmd}" ]]; then
-        echo "usage: zgen [clone|completions|list|load|oh-my-zsh|prezto|reset|save|selfupdate|update]"
+        echo "usage: zgen [clone|completions|list|load|oh-my-zsh|pmodule|prezto|reset|save|selfupdate|update]"
         return 1
     fi
 
