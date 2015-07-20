@@ -19,6 +19,10 @@ This will also create a symlink in the ZSHDOT or HOME directory. This is needed 
     zgen prezto <modulename>
 This is uses the prezto method for loading modules
 
+#### Load a repo as prezto plugins
+    zgen pmodule <reponame> <branch>
+This is uses the prezto method for loading the module, by creating a symlink and calling pmodule
+
 #### Set prezto options
     zgen prezto <modulename> <option> <value(s)>
 This must be used before the module is loaded. Or if the default modules should be loaded (default) these settings must be done before the `zgen prezto` command
