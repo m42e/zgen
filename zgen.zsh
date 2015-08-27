@@ -166,7 +166,7 @@ zgen-clone() {
 	eval $cmd
 
     if [[ ! "${ZGEN_PREZTO[@]}" =~ "${cmd}" ]]; then
-        ZGEN_PREZTO_LOAD+=("${cmd}")
+        ZGEN_PREZTO_LOAD+=("${params[@]}")
     fi
 }
 
@@ -227,9 +227,11 @@ zgen-save() {
     if [[ ${ZGEN_USE_PREZTO} == 1 ]]; then
         echo >> "${ZGEN_INIT}"
         echo "# init prezto" >> "${ZGEN_INIT}"
+		echo -n "pmodload " >> "${ZGEN_INIT}"
         for module in "${ZGEN_PREZTO_LOAD[@]}"; do
-            echo "${module}" >> "${ZGEN_INIT}"
+            echo -n "${module} " >> "${ZGEN_INIT}"
         done
+		echo >> "${ZGEN_INIT}"
     fi
 
     zgen-apply --verbose
