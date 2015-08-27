@@ -145,13 +145,24 @@ zgen-clone() {
 }
 
 -zgen-prezto-option(){
-	local module=${1}
-	shift
-	local params="$*"
-	local cmd="zstyle ':prezto:module:${module}' $params"
+    local module=${1}
+    shift
+    local option=${1}
+    shift
+    local params=$@
+    if [[ ${module} =~ "^:" ]]; then
+        module=${module[1,]}
+    fi
+    if [[ ! $module =~ "^(\*|module|prezto:module):" ]]; then
+        module="module:$module"
+    fi
+    if [[ ! $module =~ "^(prezto):" ]]; then
+        module="prezto:$module"
+    fi
+    local cmd="zstyle ':${module}' $option ${(qq)params}"
 
-	# execute in place
-	eval $cmd
+    # execute in place
+    eval $cmd
 
     if [[ ! "${ZGEN_PREZTO_OPTIONS[@]}" =~ "${cmd}" ]]; then
         ZGEN_PREZTO_OPTIONS+=("${cmd}")
@@ -382,35 +393,32 @@ zgen-prezto() {
     local repo="$ZGEN_PREZTO_REPO"
     local file="${1:-init.zsh}"
 
-	# load prezto itself
-	if [[ $# == 0 ]]; then
-		ZGEN_USE_PREZTO=1
-		zgen-load "${repo}" "${file}"
-		if [[ ! -h ${ZDOTDIR:-$HOME}/.zprezto ]]; then
-			local dir="$(-zgen-get-clone-dir ${repo} ${ZGEN_PREZTO_BRANCH})"
-			ln -s "${dir}" "${ZDOTDIR:-$HOME}/.zprezto"
-		fi
-		if [[ ${ZGEN_PREZTO_LOAD_DEFAULT} != 0 ]]; then
-			-zgen-prezto-load "'environment' 'terminal' 'editor' 'history' 'directory' 'spectrum' 'utility' 'completion' 'prompt'"
-		fi
+    # load prezto itself
+    if [[ $# == 0 ]]; then
+        ZGEN_USE_PREZTO=1
+        zgen-load "${repo}" "${file}"
+        if [[ ! -h ${ZDOTDIR:-$HOME}/.zprezto ]]; then
+            local dir="$(-zgen-get-clone-dir ${repo} ${ZGEN_PREZTO_BRANCH})"
+            ln -s "${dir}" "${ZDOTDIR:-$HOME}/.zprezto"
+        fi
+        if [[ ${ZGEN_PREZTO_LOAD_DEFAULT} != 0 ]]; then
+            -zgen-prezto-load "'environment' 'terminal' 'editor' 'history' 'directory' 'spectrum' 'utility' 'completion' 'prompt'"
+        fi
 
-	# this is a prezto module
-	elif [[ $# == 1 ]]; then
-		local module=${file}
-		if [[ -z ${file} ]]; then
-			echo "Please specify which module to load using 'zgen prezto <name of module>'"
-			return 1
-		fi
-		-zgen-prezto-load "'$module'"
+        # this is a prezto module
+    elif [[ $# == 1 ]]; then
+        local module=${file}
+        if [[ -z ${file} ]]; then
+            echo "Please specify which module to load using 'zgen prezto <name of module>'"
+            return 1
+        fi
+        -zgen-prezto-load "'$module'"
 
-	# this is a prezto option
-	else
-		shift
-		if [[ ${file} =~ "^(:|:?prezto|:?module)" ]]; then
-			echo "Please name only the modules name"
-		fi
-		-zgen-prezto-option ${file} "$*"
-	fi
+        # this is a prezto option
+    else
+        shift
+        -zgen-prezto-option ${file} ${(q)@}
+    fi
 
 }
 
