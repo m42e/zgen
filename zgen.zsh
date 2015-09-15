@@ -132,8 +132,6 @@ zgen-clone() {
 -zgen-source() {
     local file="${1}"
 
-    source "${file}"
-
     # Add to ZGEN_LOADED array if not present
     if [[ ! "${ZGEN_LOADED[@]}" =~ "${file}" ]]; then
         ZGEN_LOADED+=("${file}")
@@ -161,9 +159,6 @@ zgen-clone() {
     fi
     local cmd="zstyle ':${module}' $option ${(qq)params}"
 
-    # execute in place
-    eval $cmd
-
     if [[ ! "${ZGEN_PREZTO_OPTIONS[@]}" =~ "${cmd}" ]]; then
         ZGEN_PREZTO_OPTIONS+=("${cmd}")
     fi
@@ -174,8 +169,6 @@ zgen-clone() {
 	local cmd="pmodload ${params[@]}"
 
 	# execute in place
-	eval $cmd
-
     if [[ ! "${ZGEN_PREZTO[@]}" =~ "${cmd}" ]]; then
         ZGEN_PREZTO_LOAD+=("${params[@]}")
     fi
@@ -259,12 +252,11 @@ zgen-save() {
        echo "   ;" >> "${ZGEN_INIT}"
        echo "fi" >> "${ZGEN_INIT}"
     fi
-
     zgen-apply --verbose
+	. ${ZGEN_INIT}
 }
 
 zgen-apply() {
-  fpath=(${(q)ZGEN_COMPLETIONS[@]} ${fpath})
   [[ "$1" == --verbose ]] && echo "zgen: Creating ${ZGEN_DIR}/zcompdump"
   compinit -d "${ZGEN_DIR}/zcompdump"
 }
